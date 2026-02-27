@@ -98,6 +98,7 @@ typedef struct MessageData
 {
     MQTTMessage* message;
     MQTTString* topicName;
+    void* userdata;
 } MessageData;
 
 typedef struct MQTTConnackData
@@ -130,6 +131,7 @@ typedef struct MQTTClient
     {
         const char* topicFilter;
         void (*fp) (MessageData*);
+        void* userdata;
     } messageHandlers[MAX_MESSAGE_HANDLERS];      /* Message handlers are indexed by subscription topic */
 
     void (*defaultMessageHandler) (MessageData*);
@@ -186,6 +188,10 @@ DLLExport int MQTTPublish(MQTTClient* client, const char* topicName, MQTTMessage
  */
 DLLExport int MQTTSetMessageHandler(MQTTClient* c, const char* topicFilter, messageHandler messageHandler);
 
+/** MQTT SetMessageHandler with userdata - set or remove a per topic message handler and pass userdata to the callback via MessageData->userdata
+ */
+DLLExport int MQTTSetMessageHandlerWithUserdata(MQTTClient* c, const char* topicFilter, messageHandler messageHandler, void* userdata);
+
 /** MQTT Subscribe - send an MQTT subscribe packet and wait for suback before returning.
  *  @param client - the client object to use
  *  @param topicFilter - the topic filter to subscribe to
@@ -202,6 +208,14 @@ DLLExport int MQTTSubscribe(MQTTClient* client, const char* topicFilter, enum MQ
  *  @return success code
  */
 DLLExport int MQTTSubscribeWithResults(MQTTClient* client, const char* topicFilter, enum MQTTQoS, messageHandler, MQTTSubackData* data);
+
+/** MQTT Subscribe with userdata - same as MQTTSubscribeWithResults but passes userdata to the message handler via MessageData->userdata
+ */
+DLLExport int MQTTSubscribeWithResultsWithUserdata(MQTTClient* client, const char* topicFilter, enum MQTTQoS, messageHandler, void* userdata, MQTTSubackData* data);
+
+/** MQTT Subscribe with userdata - same as MQTTSubscribe but passes userdata to the message handler via MessageData->userdata
+ */
+DLLExport int MQTTSubscribeWithUserdata(MQTTClient* client, const char* topicFilter, enum MQTTQoS, messageHandler, void* userdata);
 
 /** MQTT Subscribe - send an MQTT unsubscribe packet and wait for unsuback before returning.
  *  @param client - the client object to use
